@@ -1,3 +1,12 @@
-In this spache i´ll create my roadmap to be  ML engineer
+# ML Engineer Roadmap
 
-In the file 'algorithms' i gonna to push all the LeetCode excersices i do in these days. 
+Repository for active practice while I am building my career as ML Engineer
+## Estructur
+- `Fundamentals/Numpy` — Exercise about ML(numpy,etc)
+- `algorithms` — LeetCode Exercise (NeetCode roadmap)
+
+## Stack
+Python · NumPy · Scikit-learn · SQL
+
+## Goal
+Document real progress and not only theory

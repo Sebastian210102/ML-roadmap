@@ -1,3 +1,5 @@
+import csv
+
 class DataCleaner:
     def __init__(self, data : list):
         self.data = data
@@ -21,6 +23,14 @@ class DataCleaner:
         print(f"Cleaned data: {len(self.new_data)}")
         print(f'Number of nulls removed: {removed}')
 
+    def to_csv(self, filename):
+        fieldnames = list(self.new_data[0].keys())
+        with open(f"./{filename}", mode = 'w', newline='', encoding='utf-8') as file:
+            escritor = csv.DictWriter(file, fieldnames=fieldnames)
+            escritor.writeheader()
+            escritor.writerows(self.new_data)
+
+
 
 data = [
     {"name": "Sebastian", "age": 23, "salary": None},
@@ -32,3 +42,4 @@ cleaner = DataCleaner(data)
 cleaner.drop_nulls()         # elimina rows con cualquier None
 cleaner.drop_empty_strings() # elimina rows con strings vacíos
 cleaner.summary()            # imprime cuántos rows quedaron y cuántos se eliminaron
+cleaner.to_csv("salida")

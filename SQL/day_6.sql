@@ -75,3 +75,62 @@ SELECT
 FROM Series
 
 
+
+
+/*
+RANK: 
+Como manejar el empaque, si dos o mas filas tienen el mismo valor les da el mismo rango 
+*/
+
+SELECT
+    titulo,
+    rating_imdb,
+    RANK() OVER (ORDER BY rating_imdb DESC) AS ranking_por_genero
+FROM Series
+
+/*
+DENSE_RANK: 
+Necesitamos una secuencia continua de rangos, asigna rangos a las filas en una partición 
+de acuerdo a un tratamiento, los rangos van a ser continuos aquí. 
+*/
+
+SELECT
+    titulo,
+    rating_imdb,
+    DENSE_RANK() OVER (ORDER BY rating_imdb DESC) AS ranking_por_genero
+FROM Episodios
+
+
+/*REGEX: Son una secuencia de caracteres que gorman un patron para encontrar determinada secuencia de caracteres */
+
+SELECT titulo, descripcion
+FROM Series
+WHERE descripcion REGEXP '(?i)más'
+
+/*
+PROYECTO DEL DÍA
+*/
+
+WITH EpisodiosRecientes AS(
+    SELECT
+        serie_id,
+        COUNT(episodio_id) AS num_episodios
+    FROM Episodios
+    GROUP BY serie_id
+),
+
+Calificaciones AS (
+    SELECT 
+        serie_id, 
+        AVG(rating_imdb) AS promedio_imdb
+    FROM Episodios
+    GROUP BY serie_id
+)
+
+SELECT s.titulo.
+    er.numm_episodios,
+    c.promedio_imdb
+FROM Series s
+JOIN EpisodiosRecientes er ON s.serie_id = er.serie_id
+JOIN Calificaciones c ON s.serie_id = c.serie_id
+ORDER BY c.promedio_imdb DESC, er.num_episodios DES;

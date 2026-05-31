@@ -1,9 +1,19 @@
 from fastapi import FastAPI
+from routers import products, users
+from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
 
+app = FastAPI(  )
 
+#Routers
+#Router de productos
+app.include_router(products.router)
 
+#Router user
+app.include_router(users.router)
+
+#Staticos
+app.mount("/static", StaticFiles(directory="static"), name="static") #Podemos accder a la imagen que tenemos y exponerlo
 
 @app.get("/") #Raiz de la IP de nuestra api
 

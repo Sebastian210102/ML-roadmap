@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import products, users
+from routers import products, users, jwt_oauth_users, basic_auth_users
 from fastapi.staticfiles import StaticFiles
 
 
@@ -11,6 +11,12 @@ app.include_router(products.router)
 
 #Router user
 app.include_router(users.router)
+
+#Router Autenticación
+
+app.include_router(basic_auth_users.router)
+app.include_router(jwt_oauth_users.router)
+
 
 #Staticos
 app.mount("/static", StaticFiles(directory="static"), name="static") #Podemos accder a la imagen que tenemos y exponerlo

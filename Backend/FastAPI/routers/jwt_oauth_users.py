@@ -1,19 +1,20 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from passlib.context import CryptContext
+import jwt  # Usamos PyJWT moderno
+import bcrypt  # Usamos bcrypt nativo
 from datetime import datetime, timedelta, UTC
+
+SECRET_KEY = "0b2faf5e31953305171049e30175e597b91d1b3158e24c598d8872a9b61fb861"
 ALGORITHM = "HS256"
-ACCES_TOKEN_DURATION = 1 # un minuto de duarcion de autenticación 
+ACCESS_TOKEN_DURATION = 1 # un minuto de duarcion de autenticación 
 
 
 
-app = FastAPI()
+router = APIRouter(tags=["Auth-jwt"])
 
 outh2 = OAuth2PasswordBearer(tokenUrl="login")
 
-crypt = CryptContext(schemes=["bcrypt"])
 
 #Esta serían los datos que se van a manejar por la red 
 class User(BaseModel):
@@ -45,9 +46,38 @@ users_db = {
 def serch_user_db(user_name:str):
     if user_name in users_db:
         return UserDB(**users_db[user_name])
+    return None
+
+def serch_user(user_name:str):
+    if user_name in users_db:
+        return User(**users_db[user_name])
+
+async def auth_user(token: str = Depends(outh2)):
+
+    exeption = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                                detail="Credenciales de autentización invalidas", 
+                                headers={"WWW-Authenticate":"Bearer"})
+    try:
+        username = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM).get("sub")
+        if username is None: 
+            raise exeption
+         
+    except jwt.InvalidTokenError:
+        raise exeption    
+    
+    return serch_user(username)
+
+
+#Criterio de dependencia
+async def current_user(user: User = Depends(auth_user)):
+    if user.disabled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                            detail="Usuario inactivo", 
+                            headers={"WWW-Authenticate":"Bearer"})
+    return user 
     
 
-@app.post("/login")
+@router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     if not user_db:
@@ -55,13 +85,26 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     
     user = serch_user_db(form.username)
 
-
-    if crypt.verify(form.password, user.password): #comparar contraseñas para ver si son iguales
+    #Convertir los datos a bytes para validar
+    password_bytes = form.password.encode('utf-8')
+    hash_bytes = user.password.encode('utf-8')
+    #comparar el texto plano con hash, si no coenciden se lanza el error
+    if not bcrypt.checkpw(password_bytes, hash_bytes): #comparar contraseñas para ver si son iguales
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Contraseña no es correcta") 
 
-    
-    expire = datetime.now(UTC) + timedelta(minutes=ACCES_TOKEN_DURATION) 
+
     
 
+    acces_token = {"sub":user.username, 
+                   "exp":datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_DURATION) }
 
-    return{"acces_token": user.username,"token_type": "bearer"}
+    #Criframos el token 
+    token_cifrado = {
+        jwt.encode(acces_token, SECRET_KEY, algorithm=ALGORITHM)
+    }
+    return{"acces_token": token_cifrado,"token_type": "bearer"} # Esto es lo que tenemos que manejar cuando estemos llamando a nuestra API
+
+
+@router.get("/users/me")
+async def me(user: User = Depends(current_user)):
+    return user

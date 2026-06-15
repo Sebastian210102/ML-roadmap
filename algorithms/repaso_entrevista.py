@@ -114,3 +114,7 @@ def obtener_aprobados(calificaciones:list) -> list:
     return aprobados
 calificaciones = [85, 42, 90, 55, 60, 78, 30]
 print(obtener_aprobados(calificaciones))
+
+
+import secrets
+print(secrets.token_hex(32))

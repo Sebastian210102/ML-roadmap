@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 
@@ -42,12 +42,12 @@ async def user(id: int):
     
 #Agregar un usuario
 
-@router.post("/user/", response_model=User,status_code=201)
+@router.post("/user/", response_model=User,status_code=status.HTTP_201_CREATED)
 async def user(user: User):
     
     if type(search_user(user.id)) == User :
         
-        raise HTTPException(status_code=404, detail="El usuario ya existe") #Retornar errores de forma correcta
+        raise HTTPException(status_code=status.http_404, detail="El usuario ya existe") #Retornar errores de forma correcta
         
     users_fake_db.append(user)
     return user

@@ -53,7 +53,7 @@ BEGIN
     INSERT INTO LogEmpleados(empleado_id, fecha_registro) VALUES(NEW.empleado_id, NOW());
 END$$
 
-DELIMITER ;
+DELIMITER ; 
 
 /*
 Proyecto del día

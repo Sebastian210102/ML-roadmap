@@ -31,6 +31,7 @@ while counter <= max_intentos:
         break
     elif top < numero or numero < bottom:
         print(f"Solo se permiten números del {bottom} al {top}: ") 
+        continue
     elif numero > numero_random:
         print(f"El numero es menor a {numero} ") 
     elif numero < numero_random: 
